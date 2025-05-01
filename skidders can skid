@@ -1,0 +1,223 @@
+local library =
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/iblameaabis/Ililililililililililililil/refs/heads/main/W%20UI", true))()
+
+local window = library:AddWindow("DNIgger Version", {
+    main_color = Color3.fromRGB(0, 0, 0),
+    min_size = Vector2.new(470, 470),
+    can_resize = false,
+})
+
+local farmingTab = window:AddTab("MainFarm")
+farmingTab:Show()
+
+farmingTab:AddSwitch("Hide Frames", function(bool)
+  for _, frameName in ipairs({"strengthFrame", "durabilityFrame", "agilityFrame"}) do
+        local frame = game:GetService("ReplicatedStorage"):FindFirstChild(frameName)
+        if frame and frame:IsA("GuiObject") then
+            frame.Visible = not bool
+        end
+    end
+end)
+
+local autoFastRebirthSwitch =
+    farmingTab:AddSwitch(
+    "Fast Rebirth",
+    function(toggleState)
+      local a=game:GetService("ReplicatedStorage")local b=game:GetService("Players")local c=b.LocalPlayer;local d=function(e)local f=c.petsFolder;for g,h in pairs(f:GetChildren())do if h:IsA("Folder")then for i,j in pairs(h:GetChildren())do a.rEvents.equipPetEvent:FireServer("unequipPet",j)end end end;task.wait(.1)end;local k=function(l)d()task.wait(.01)for m,n in pairs(c.petsFolder.Unique:GetChildren())do if n.Name==l then a.rEvents.equipPetEvent:FireServer("equipPet",n)end end end;local o=function(p)local q=workspace.machinesFolder:FindFirstChild(p)if not q then for r,s in pairs(workspace:GetChildren())do if s:IsA("Folder")and s.Name:find("machines")then q=s:FindFirstChild(p)if q then break end end end end;return q end;local t=function()local u=game:GetService("VirtualInputManager")u:SendKeyEvent(true,"E",false,game)task.wait(.1)u:SendKeyEvent(false,"E",false,game)end;task.spawn(function()while true do local v=c.leaderstats.Rebirths.Value;local w=10000+(5000*v)if c.ultimatesFolder:FindFirstChild("Golden Rebirth")then local x=c.ultimatesFolder["Golden Rebirth"].Value;w=math.floor(w*(1-(x*0.1)))end;d()task.wait(.1)k("Swift Samurai")while c.leaderstats.Strength.Value<w do for y=1,10 do c.muscleEvent:FireServer("rep")end;task.wait()end;d()task.wait(.1)k("Tribal Overlord")local z=o("Jungle Bar Lift")if z and z:FindFirstChild("interactSeat")then c.Character.HumanoidRootPart.CFrame=z.interactSeat.CFrame*CFrame.new(0,3,0)repeat task.wait(.1)t()until c.Character.Humanoid.Sit end;local A=c.leaderstats.Rebirths.Value;repeat a.rEvents.rebirthRemote:InvokeServer("rebirthRequest")task.wait(.1)until c.leaderstats.Rebirths.Value>A;task.wait()end end)
+    end
+)
+autoFastRebirthSwitch:Set(false)
+
+local folder = window:AddTab("fps")
+
+local folder2 = folder:AddFolder("Optimization (For Rebirthing And Grinding)")
+
+folder2:AddButton("Full Optimization", function()
+    local player = game:GetService("Players").LocalPlayer
+    local playerGui = player:WaitForChild("PlayerGui")
+
+    -- Disable all active UI
+    for _, ui in pairs(playerGui:GetChildren()) do
+        if ui:IsA("ScreenGui") and ui.Enabled then
+            ui.Enabled = false
+        end
+    end
+
+    -- Set rendering and physics settings
+    local success = pcall(function()
+        settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+        settings().Physics.PhysicsEnvironmentalThrottle = Enum.EnviromentalPhysicsThrottle.Default
+        settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
+        settings().Physics.AllowSleep = true
+        settings().Physics.ForceCSGv2 = false
+        settings().Rendering.EagerBulkExecution = true
+        settings().Physics.NetworkOwnershipRule = Enum.NetworkOwnershipRule.Manual
+        settings().Network.IncomingReplicationLag = 0
+        game:GetService("NetworkClient"):SetOutgoingKBPSLimit(100)
+    end)
+
+    -- Lighting optimization
+    local lighting = game:GetService("Lighting")
+    lighting.GlobalShadows = false
+    lighting.FogEnd = 1e10
+    lighting.Brightness = 0
+    lighting.Ambient = Color3.fromRGB(0, 0, 0)  -- Setting ambient light to black
+
+    -- Remove particle/visual effects
+    for _, obj in pairs(game:GetDescendants()) do
+        if obj:IsA("ParticleEmitter") or obj:IsA("Trail") then
+            obj.Lifetime = NumberRange.new(0)
+        elseif obj:IsA("Fire") or obj:IsA("SpotLight") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
+            obj.Enabled = false
+        end
+    end
+
+    -- Optional: If you want to clear some other elements like sounds or other GUI objects
+    -- Clear sounds
+    for _, sound in pairs(game:GetService("Workspace"):GetDescendants()) do
+        if sound:IsA("Sound") then
+            sound:Stop()
+        end
+    end
+
+    -- Optionally set a custom Field of View for performance gains
+    local camera = game:GetService("Workspace").CurrentCamera
+    camera.FieldOfView = 50
+end)
+
+folder2:AddLabel("----------")
+
+folder2:AddButton("Anti Lag (Advanced)", function()
+    -- Remove decals and textures
+    for _, obj in pairs(game:GetDescendants()) do
+        if obj:IsA("Decal") or obj:IsA("Texture") then
+            obj:Destroy()
+        end
+    end
+
+    -- Disable terrain decoration and shadows
+    local terrain = workspace:FindFirstChildOfClass("Terrain")
+    if terrain then
+        terrain.WaterWaveSize = 0
+        terrain.WaterWaveSpeed = 0
+        terrain.WaterReflectance = 0
+        terrain.WaterTransparency = 1
+        terrain.Decorations = false
+    end
+
+    -- Remove explosion leftovers, unused parts, or debris
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Explosion") or v:IsA("Debris") then
+            v:Destroy()
+        elseif v:IsA("BasePart") and v.Name:lower():find("debris") then
+            v:Destroy()
+        end
+    end
+
+    -- Disable all lights
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("PointLight") or v:IsA("SurfaceLight") or v:IsA("SpotLight") then
+            v.Enabled = false
+        end
+    end
+
+    -- Disable all ambient sounds
+    for _, sound in pairs(workspace:GetDescendants()) do
+        if sound:IsA("Sound") then
+            sound:Stop()
+        end
+    end
+
+    print("Anti-Lag Activated: Textures, lighting, sounds, and effects removed.")
+end)
+
+folder2:AddButton("Ultra FPS Booster", function()
+    -- Lower rendering settings
+    settings().Rendering.QualityLevel = Enum.QualityLevel.Level01
+    settings().Rendering.MeshPartDetailLevel = Enum.MeshPartDetailLevel.Level01
+    settings().Rendering.EagerBulkExecution = true
+    settings().Rendering.ReloadAssets = false
+
+    -- Disable shadows, lighting effects
+    local lighting = game:GetService("Lighting")
+    lighting.GlobalShadows = false
+    lighting.FogEnd = 1e10
+    lighting.Brightness = 0
+    lighting.EnvironmentDiffuseScale = 0
+    lighting.EnvironmentSpecularScale = 0
+
+    -- Disable particles and lights
+    for _, obj in ipairs(game:GetDescendants()) do
+        if obj:IsA("ParticleEmitter") or obj:IsA("Trail") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") then
+            obj:Destroy()
+        elseif obj:IsA("PointLight") or obj:IsA("SpotLight") or obj:IsA("SurfaceLight") then
+            obj.Enabled = false
+        end
+    end
+
+    -- Kill all sounds
+    for _, sound in pairs(game:GetDescendants()) do
+        if sound:IsA("Sound") then
+            sound:Stop()
+            sound.Volume = 0
+        end
+    end
+
+    -- Remove textures and decals
+    for _, obj in ipairs(game:GetDescendants()) do
+        if obj:IsA("Decal") or obj:IsA("Texture") then
+            obj:Destroy()
+        end
+    end
+
+    -- Simplify terrain
+    local terrain = workspace:FindFirstChildOfClass("Terrain")
+    if terrain then
+        terrain.WaterWaveSize = 0
+        terrain.WaterWaveSpeed = 0
+        terrain.WaterReflectance = 0
+        terrain.WaterTransparency = 1
+        terrain.Decorations = false
+    end
+
+    -- Disable GUI animations
+    local player = game.Players.LocalPlayer
+    local playerGui = player:FindFirstChild("PlayerGui")
+    if playerGui then
+        for _, gui in ipairs(playerGui:GetDescendants()) do
+            if gui:IsA("TextLabel") or gui:IsA("ImageLabel") or gui:IsA("ImageButton") then
+                gui.Visible = false
+            end
+        end
+    end
+
+    -- Remove visual accessories
+    for _, acc in ipairs(player.Character:GetChildren()) do
+        if acc:IsA("Accessory") or acc:IsA("Clothing") then
+            acc:Destroy()
+        end
+    end
+
+    -- Pause character animations
+    local humanoid = player.Character:FindFirstChildWhichIsA("Humanoid")
+    if humanoid then
+        for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+            track:Stop()
+        end
+    end
+
+    print("Ultra FPS Boost applied. Maximum rendering and resource optimization complete.")
+end)
+
+folder2:AddSwitch("FPS Boost & Anti Lag", function(state)
+    if state then
+        -- Enable the features when the toggle is switched on
+        deleteMap()
+        deleteParticles()
+        fpsBooster()
+        antiLag()
+    else
+        -- If you want to add any reset functionality, do so here
+        -- e.g., restoring certain objects, re-enabling features, etc.
+    end
+end)
